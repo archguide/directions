@@ -259,27 +259,15 @@ const userLocationIcon = {
         }
 
 function showUserLocation(lat, lng) {
-    try {
-        console.log('Showing user location:', lat, lng);
-        
-        // Remove previous user marker
-        if (userMarker) {
-            userMarker.setMap(null);
-        }
-
-        // Add marker with direct icon URL (no object)
-        userMarker = new google.maps.Marker({
-            position: { lat: lat, lng: lng },
-            map: map,
-            title: "Your Location",
-            icon: "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png",
-            zIndex: 1000
-        });
-
-        console.log('User location updated:', lat.toFixed(4), lng.toFixed(4));
-    } catch (error) {
-        console.error('Show user location error:', error);
-    }
+    console.log('Icon URL being used:', "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
+    
+    userMarker = new google.maps.Marker({
+        position: { lat: lat, lng: lng },
+        map: map,
+        title: "Your Location",
+        icon: "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png", // Direct URL
+        zIndex: 1000
+    });
 }
         // Global functions for Draftbit integration
         window.setUserLocation = function(lat, lng) {
