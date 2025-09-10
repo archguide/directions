@@ -261,15 +261,12 @@ function showUserLocation(lat, lng) {
         userMarker.setMap(null);
     }
 
-    // Add user marker with shaded dot
+    // Simple blue dot (this was working before)
     userMarker = new google.maps.Marker({
         position: { lat: lat, lng: lng },
         map: map,
         title: "Your Location",
-        icon: {
-            url: "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png",
-            scaledSize: new google.maps.Size(20, 20)
-        },
+        icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
         zIndex: 1000
     });
 }
