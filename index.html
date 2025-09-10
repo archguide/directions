@@ -252,30 +252,29 @@ const userLocationIcon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
             }
         }
 
-        function showUserLocation(lat, lng) {
-            try {
-                console.log('Showing user location:', lat, lng);
-                
-                // Remove previous user marker
-                if (userMarker) {
-                    userMarker.setMap(null);
-                }
-
-                // Add GPS-style blue circle marker
-                userMarker = new google.maps.Marker({
-                    position: { lat: lat, lng: lng },
-                    map: map,
-                    title: "Your Location",
-                    icon: userLocationIcon,
-                    zIndex: 1000
-                });
-
-                console.log('User location updated:', lat.toFixed(4), lng.toFixed(4));
-            } catch (error) {
-                console.error('Show user location error:', error);
-            }
+       function showUserLocation(lat, lng) {
+    try {
+        console.log('Showing user location:', lat, lng);
+        
+        // Remove previous user marker
+        if (userMarker) {
+            userMarker.setMap(null);
         }
 
+        // Add simple blue dot marker
+        userMarker = new google.maps.Marker({
+            position: { lat: lat, lng: lng },
+            map: map,
+            title: "Your Location",
+            icon: userLocationIcon,
+            zIndex: 1000
+        });
+
+        console.log('User location updated:', lat.toFixed(4), lng.toFixed(4));
+    } catch (error) {
+        console.error('Show user location error:', error);
+    }
+}
         // Global functions for Draftbit integration
         window.setUserLocation = function(lat, lng) {
             try {
