@@ -78,11 +78,12 @@
         };
 
         // GPS-style blue location marker
-        const userLocationIcon = {
-            url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%234285F4' fill-opacity='0.3' stroke='%234285F4' stroke-width='1'/%3E%3Ccircle cx='10' cy='10' r='3' fill='%234285F4'/%3E%3C/svg%3E",
-            scaledSize: new google.maps.Size(20, 20),
-            anchor: new google.maps.Point(10, 10)
-        };
+      // Simple blue location marker
+// Small blue location marker
+const userLocationIcon = {
+    url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", 
+    scaledSize: new google.maps.Size(20, 20)
+};
 
         function initMap() {
             console.log('Initializing map...');
