@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tour Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100%; }
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            max-width: 280px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .tour-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tour-stats {
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .stops-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .stop-item {
+            padding: 5px;
+            margin: 2px 0;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .stop-item:hover {
+            background: #f0f0f0;
+        }
+        .stop-number {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #1E90FF;
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            border-radius: 50%;
+            font-size: 10px;
+            margin-right: 8px;
+        }
+        .status { margin-top: 10px; color: #666; font-size: 12px; }
+        .button {
+            background: #1E90FF;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-size: 12px;
+        }
+        .button:hover { background: #0080FF; }
+        .tour-selector {
+            margin-bottom: 15px;
+        }
+        .tour-selector select {
+            width: 100%;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="info-panel">
+        <div class="tour-selector">
+            <select id="tourSelect" onchange="loadTour()">
+                <option value="downtown">Downtown LA Food Tour</option>
+                <option value="hollywood">Hollywood Landmarks</option>
+                <option value="beach">Santa Monica Beach Tour</option>
+            </select>
+        </div>
+        
+        <div class="tour-header" id="tourTitle">Downtown LA Food Tour</div>
+        
+        <div class="tour-stats">
+            Total Distance: <span id="totalDistance">Loading...</span><br>
+            Estimated Time: <span id="totalDuration">Loading...</span><br>
+            Stops: <span id="stopCount">0</span>
+        </div>
+        
+        <div class="stops-list" id="stopsList"></div>
+        
+        <div class="status" id="location-status">Waiting for location...</div>
+        <button class="button" onclick="showRoute()">Refresh Route</button>
+        <button class="button" onclick="fitMapToTour()">Show Full Tour</button>
+    </div>
+
+    <script>
+        let map;
+        let directionsService;
+        let directionsRenderer;
+        let userMarker;
+        let tourMarkers = [];
+        let currentTour = 'downtown';
+
+        // Define your tours here - add as many as you need
+        const tours = {
+            downtown: {
+                name: "Downtown LA Food Tour",
+                stops: [
+                    { lat: 34.0522, lng: -118.2437, name: "Grand Central Market", type: "start" },
+                    { lat: 34.0508, lng: -118.2467, name: "Walt Disney Concert Hall", type: "attraction" },
+                    { lat: 34.0494, lng: -118.2543, name: "The Broad Museum", type: "museum" },
+                    { lat: 34.0502, lng: -118.2560, name: "Angel's Flight", type: "landmark" },
+                    { lat: 34.0480, lng: -118.2540, name: "Pershing Square", type: "park" },
+                    { lat: 34.0440, lng: -118.2500, name: "Little Tokyo", type: "food" },
+                    { lat: 34.0425, lng: -118.2485, name: "Arts District", type: "shopping" },
+                    { lat: 34.0445, lng: -118.2345, name: "Union Station", type: "end" }
+                ]
+            },
+            hollywood: {
+                name: "Hollywood Landmarks",
+                stops: [
+                    { lat: 34.1018, lng: -118.3407, name: "Hollywood Sign Viewpoint", type: "start" },
+                    { lat: 34.1019, lng: -118.3396, name: "Griffith Observatory", type: "attraction" },
+                    { lat: 34.1022, lng: -118.3269, name: "Hollywood Bowl", type: "venue" },
+                    { lat: 34.1016, lng: -118.3416, name: "Walk of Fame - Highland", type: "landmark" },
+                    { lat: 34.1016, lng: -118.3426, name: "TCL Chinese Theatre", type: "theater" },
+                    { lat: 34.1018, lng: -118.3442, name: "Dolby Theatre", type: "theater" },
+                    { lat: 34.0981, lng: -118.3267, name: "Capitol Records Building", type: "landmark" },
+                    { lat: 34.0928, lng: -118.3287, name: "Sunset Strip", type: "end" }
+                ]
+            },
+            beach: {
+                name: "Santa Monica Beach Tour",
+                stops: [
+                    { lat: 34.0194, lng: -118.4912, name: "Santa Monica Pier", type: "start" },
+                    { lat: 34.0195, lng: -118.4975, name: "Third Street Promenade", type: "shopping" },
+                    { lat: 34.0169, lng: -118.4963, name: "Santa Monica Beach", type: "beach" },
+                    { lat: 34.0118, lng: -118.4951, name: "Venice Beach Boardwalk", type: "attraction" },
+                    { lat: 34.0097, lng: -118.4931, name: "Muscle Beach", type: "landmark" },
+                    { lat: 34.0049, lng: -118.4846, name: "Abbot Kinney Boulevard", type: "shopping" },
+                    { lat: 33.9850, lng: -118.4695, name: "Manhattan Beach Pier", type: "end" }
+                ]
+            }
+        };
+
+        // Simple color-coded markers using Google's built-in icons
+        const markerStyles = {
+            start: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            end: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+            food: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png",
+            attraction: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            museum: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png",
+            landmark: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
+            shopping: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png",
+            park: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            beach: "http://maps.google.com/mapfiles/ms/icons/lightblue-dot.png",
+            venue: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png",
+            theater: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+            default: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+        };
+
+        function initMap() {
+            console.log('Initializing map...');
+            
+            try {
+                // Initialize map
+                map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 12,
+                    center: { lat: 34.0522, lng: -118.2437 },
+                    mapTypeId: "roadmap",
+                });
+
+                // Initialize directions service and renderer
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                    draggable: false,
+                    suppressMarkers: true, // We'll add custom markers
+                    polylineOptions: {
+                        strokeColor: "#1E90FF",
+                        strokeWeight: 4,
+                        strokeOpacity: 0.8
+                    }
+                });
+                directionsRenderer.setMap(map);
+
+                // Check URL for location from Draftbit
+                checkURLForLocation();
+
+                // Load initial tour
+                loadTour();
+
+                console.log('Map initialization complete');
+            } catch (error) {
+                console.error('Map initialization error:', error);
+                document.getElementById('location-status').innerHTML = 'Map initialization failed: ' + error.message;
+            }
+        }
+
+        function loadTour() {
+            try {
+                currentTour = document.getElementById('tourSelect').value;
+                const tour = tours[currentTour];
+                
+                document.getElementById('tourTitle').textContent = tour.name;
+                document.getElementById('stopCount').textContent = tour.stops.length;
+                
+                // Clear existing markers
+                clearTourMarkers();
+                
+                // Add tour markers
+                addTourMarkers(tour.stops);
+                
+                // Update stops list
+                updateStopsList(tour.stops);
+                
+                // Show route
+                showRoute();
+            } catch (error) {
+                console.error('Load tour error:', error);
+            }
+        }
+
+        function clearTourMarkers() {
+            tourMarkers.forEach(marker => {
+                try {
+                    marker.setMap(null);
+                } catch (e) {
+                    console.warn('Error clearing marker:', e);
+                }
+            });
+            tourMarkers = [];
+        }
+
+        function addTourMarkers(stops) {
+            stops.forEach((stop, index) => {
+                try {
+                    const iconUrl = markerStyles[stop.type] || markerStyles.default;
+                    
+                    const marker = new google.maps.Marker({
+                        position: { lat: stop.lat, lng: stop.lng },
+                        map: map,
+                        title: `${index + 1}. ${stop.name}`,
+                        icon: {
+                            url: iconUrl,
+                            scaledSize: new google.maps.Size(32, 32)
+                        },
+                        zIndex: 100 + index
+                    });
+
+                    // Add info window
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `<div style="font-size: 14px;"><strong>Stop ${index + 1}</strong><br>${stop.name}<br><em>${stop.type}</em></div>`
+                    });
+
+                    marker.addListener('click', () => {
+                        infoWindow.open(map, marker);
+                    });
+
+                    tourMarkers.push(marker);
+                } catch (error) {
+                    console.error('Error adding marker:', error);
+                }
+            });
+        }
+
+        function updateStopsList(stops) {
+            try {
+                const list = document.getElementById('stopsList');
+                list.innerHTML = '';
+                
+                stops.forEach((stop, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'stop-item';
+                    div.innerHTML = `
+                        <span class="stop-number">${index + 1}</span>
+                        <strong>${stop.name}</strong><br>
+                        <span style="color: #666; font-size: 10px;">${stop.type}</span>
+                    `;
+                    
+                    div.onclick = () => {
+                        try {
+                            map.panTo({ lat: stop.lat, lng: stop.lng });
+                            map.setZoom(16);
+                        } catch (error) {
+                            console.error('Error panning to stop:', error);
+                        }
+                    };
+                    
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error updating stops list:', error);
+            }
+        }
+
+        function showRoute() {
+            try {
+                const tour = tours[currentTour];
+                if (tour.stops.length < 2) return;
+
+                console.log('Showing route for', tour.name);
+                
+                // Create waypoints (all stops except first and last)
+                const waypoints = tour.stops.slice(1, -1).map(stop => ({
+                    location: { lat: stop.lat, lng: stop.lng },
+                    stopover: true
+                }));
+
+                const request = {
+                    origin: { lat: tour.stops[0].lat, lng: tour.stops[0].lng },
+                    destination: { lat: tour.stops[tour.stops.length - 1].lat, lng: tour.stops[tour.stops.length - 1].lng },
+                    waypoints: waypoints,
+                    optimizeWaypoints: false,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    unitSystem: google.maps.UnitSystem.IMPERIAL,
+                };
+
+                directionsService.route(request, function(result, status) {
+                    try {
+                        if (status === "OK") {
+                            console.log('Route loaded successfully');
+                            directionsRenderer.setDirections(result);
+                            
+                            // Calculate total distance and duration
+                            let totalDistance = 0;
+                            let totalDuration = 0;
+                            
+                            result.routes[0].legs.forEach(leg => {
+                                totalDistance += leg.distance.value;
+                                totalDuration += leg.duration.value;
+                            });
+                            
+                            document.getElementById('totalDistance').textContent = 
+                                (totalDistance / 1609.34).toFixed(1) + ' mi';
+                            document.getElementById('totalDuration').textContent = 
+                                Math.round(totalDuration / 60) + ' mins';
+                            
+                        } else {
+                            console.error('Route error:', status);
+                            document.getElementById('totalDistance').textContent = 'Route error';
+                            document.getElementById('totalDuration').textContent = 'Route error';
+                        }
+                    } catch (error) {
+                        console.error('Route callback error:', error);
+                    }
+                });
+            } catch (error) {
+                console.error('Show route error:', error);
+            }
+        }
+
+        function fitMapToTour() {
+            try {
+                const tour = tours[currentTour];
+                const bounds = new google.maps.LatLngBounds();
+                
+                tour.stops.forEach(stop => {
+                    bounds.extend({ lat: stop.lat, lng: stop.lng });
+                });
+                
+                map.fitBounds(bounds);
+                setTimeout(() => {
+                    if (map.getZoom() > 14) {
+                        map.setZoom(14);
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Fit map error:', error);
+            }
+        }
+
+        function checkURLForLocation() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const lat = params.get('lat');
+                const lng = params.get('lng');
+                
+                if (lat && lng) {
+                    console.log('Location received from Draftbit:', lat, lng);
+                    showUserLocation(parseFloat(lat), parseFloat(lng));
+                } else {
+                    console.log('No location parameters in URL');
+                    document.getElementById('location-status').innerHTML = 
+                        'No location received. Use "Get Location" button in app.';
+                }
+            } catch (error) {
+                console.error('Check URL error:', error);
+            }
+        }
+
+        function showUserLocation(lat, lng) {
+            try {
+                console.log('Showing user location:', lat, lng);
+                
+                // Remove previous user marker
+                if (userMarker) {
+                    userMarker.setMap(null);
+                }
+
+                // Add user marker with blue icon
+                userMarker = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: map,
+                    title: "Your Location",
+                    icon: {
+                        url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                        scaledSize: new google.maps.Size(40, 40)
+                    },
+                    zIndex: 1000
+                });
+
+                // Update status
+                document.getElementById('location-status').innerHTML = 
+                    `✓ Your location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            } catch (error) {
+                console.error('Show user location error:', error);
+            }
+        }
+
+        // Global functions for Draftbit integration
+        window.setUserLocation = function(lat, lng) {
+            try {
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    showUserLocation(Number(lat), Number(lng));
+                }
+            } catch (error) {
+                console.error('Set user location error:', error);
+            }
+        };
+
+        window.switchTour = function(tourKey) {
+            try {
+                if (tours[tourKey]) {
+                    document.getElementById('tourSelect').value = tourKey;
+                    loadTour();
+                }
+            } catch (error) {
+                console.error('Switch tour error:', error);
+            }
+        };
+
+        // Message listener for Draftbit
+        document.addEventListener('message', event => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.lat && data.lng) {
+                    showUserLocation(data.lat, data.lng);
+                }
+                if (data.tour) {
+                    window.switchTour(data.tour);
+                }
+            } catch (e) {
+                console.log('Message parsing error:', e);
+            }
+        });
+
+        // Handle any uncaught errors
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Global error:', msg, 'at', url, lineNo, columnNo);
+            document.getElementById('location-status').innerHTML = 'Error: ' + msg;
+            return false;
+        };
+    </script>
+
+    <!-- Load Google Maps API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDdD8BAz34j_0zv-G3qJKTP5sKQn7PQ1w&callback=initMap"
+        onerror="console.error('Failed to load Google Maps API')">
+    </script>
+</body>
+</html>
