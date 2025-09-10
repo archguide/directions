@@ -267,12 +267,16 @@ function showUserLocation(lat, lng) {
             userMarker.setMap(null);
         }
 
-        // Add circle marker - use the icon directly
+        // Add circle marker with custom size
         userMarker = new google.maps.Marker({
             position: { lat: lat, lng: lng },
             map: map,
             title: "Your Location",
-            icon: userLocationIcon, // Use the icon object directly
+            icon: {
+                url: userLocationIcon.url,
+                scaledSize: new google.maps.Size(20, 20), // Make it bigger
+                anchor: new google.maps.Point(10, 10)
+            },
             zIndex: 1000
         });
 
