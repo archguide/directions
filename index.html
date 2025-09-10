@@ -255,7 +255,7 @@ const userLocationIcon = "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.
             }
         }
 
-  function showUserLocation(lat, lng) {
+ function showUserLocation(lat, lng) {
     try {
         console.log('Showing user location:', lat, lng);
         
@@ -264,12 +264,16 @@ const userLocationIcon = "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.
             userMarker.setMap(null);
         }
 
-        // Add simple blue dot marker
+        // Add circle marker with custom size
         userMarker = new google.maps.Marker({
             position: { lat: lat, lng: lng },
             map: map,
             title: "Your Location",
-            icon: userLocationIcon,
+            icon: {
+                url: userLocationIcon.url,
+                scaledSize: new google.maps.Size(20, 20), // Make it bigger
+                anchor: new google.maps.Point(10, 10)
+            },
             zIndex: 1000
         });
 
@@ -277,10 +281,6 @@ const userLocationIcon = "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.
     } catch (error) {
         console.error('Show user location error:', error);
     }
-}
-    // Update status
-    document.getElementById('location-status').innerHTML = 
-        `✓ Your location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
         // Global functions for Draftbit integration
         window.setUserLocation = function(lat, lng) {
