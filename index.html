@@ -61,27 +61,68 @@
             }
         };
 
-        // Simple color-coded markers using Google's built-in icons
+        // Apple Maps-style pin markers
         const markerStyles = {
-            start: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-            end: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-            food: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png",
-            attraction: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-            museum: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png",
-            landmark: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
-            shopping: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png",
-            park: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-            beach: "http://maps.google.com/mapfiles/ms/icons/lightblue-dot.png",
-            venue: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png",
-            theater: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-            default: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-        };
-
-        // GPS-style blue location marker
-        const userLocationIcon = {
-            url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%234285F4' fill-opacity='0.3' stroke='%234285F4' stroke-width='1'/%3E%3Ccircle cx='10' cy='10' r='3' fill='%234285F4'/%3E%3C/svg%3E",
-            scaledSize: new google.maps.Size(20, 20),
-            anchor: new google.maps.Point(10, 10)
+            start: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='40' viewBox='0 0 30 40'%3E%3Cpath d='M15 0C6.7 0 0 6.7 0 15c0 8.3 15 25 15 25s15-16.7 15-25C30 6.7 23.3 0 15 0z' fill='%2334C759' stroke='white' stroke-width='2'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3ES%3C/text%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(30, 40),
+                anchor: new google.maps.Point(15, 40)
+            },
+            end: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='40' viewBox='0 0 30 40'%3E%3Cpath d='M15 0C6.7 0 0 6.7 0 15c0 8.3 15 25 15 25s15-16.7 15-25C30 6.7 23.3 0 15 0z' fill='%23FF3B30' stroke='white' stroke-width='2'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3EE%3C/text%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(30, 40),
+                anchor: new google.maps.Point(15, 40)
+            },
+            food: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%23FF9500' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            attraction: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%23007AFF' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            museum: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%235856D6' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            landmark: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%23FFCC02' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            shopping: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%23FF2D92' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            park: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%2330D158' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            beach: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%2332D2FF' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            venue: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%23AF52DE' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            theater: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%23AC8E68' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            },
+            default: {
+                url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='35' viewBox='0 0 25 35'%3E%3Cpath d='M12.5 0C5.6 0 0 5.6 0 12.5c0 6.9 12.5 22.5 12.5 22.5s12.5-15.6 12.5-22.5C25 5.6 19.4 0 12.5 0z' fill='%238E8E93' stroke='white' stroke-width='1.5'/%3E%3Ccircle cx='12.5' cy='12.5' r='4' fill='white'/%3E%3C/svg%3E",
+                scaledSize: new google.maps.Size(25, 35),
+                anchor: new google.maps.Point(12.5, 35)
+            }
         };
 
         function initMap() {
@@ -265,12 +306,15 @@
                     userMarker.setMap(null);
                 }
 
-                // Add GPS-style blue circle marker
+                // Add blue user marker
                 userMarker = new google.maps.Marker({
                     position: { lat: lat, lng: lng },
                     map: map,
                     title: "Your Location",
-                    icon: userLocationIcon,
+                    icon: {
+                        url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                        scaledSize: new google.maps.Size(32, 32)
+                    },
                     zIndex: 1000
                 });
 
