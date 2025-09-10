@@ -192,13 +192,16 @@
         function addTourMarkers(stops) {
             stops.forEach((stop, index) => {
                 try {
-                    const icon = markerStyles[stop.type] || markerStyles.default;
+                    const iconUrl = markerStyles[stop.type] || markerStyles.default;
                     
                     const marker = new google.maps.Marker({
                         position: { lat: stop.lat, lng: stop.lng },
                         map: map,
                         title: `${index + 1}. ${stop.name}`,
-                        icon: icon,
+                        icon: {
+                            url: iconUrl,
+                            scaledSize: new google.maps.Size(32, 32)
+                        },
                         zIndex: 100 + index
                     });
 
