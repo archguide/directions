@@ -258,7 +258,7 @@ const userLocationIcon = {
             }
         }
 
- function showUserLocation(lat, lng) {
+function showUserLocation(lat, lng) {
     try {
         console.log('Showing user location:', lat, lng);
         
@@ -267,12 +267,12 @@ const userLocationIcon = {
             userMarker.setMap(null);
         }
 
-        // Add shaded dot marker
+        // Add marker with direct icon URL (no object)
         userMarker = new google.maps.Marker({
             position: { lat: lat, lng: lng },
             map: map,
             title: "Your Location",
-            icon: userLocationIcon,
+            icon: "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png",
             zIndex: 1000
         });
 
