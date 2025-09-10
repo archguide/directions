@@ -82,9 +82,12 @@
 // Smaller blue dot for GPS location
 // Simple blue circle dot
 // Very basic circle 
-const userLocationIcon = "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png";
-        function initMap() {
-            console.log('Initializing map...');
+// Shaded circle for user location
+const userLocationIcon = {
+    url: "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png",
+    scaledSize: new google.maps.Size(20, 20),
+    anchor: new google.maps.Point(10, 10)
+};
             
             try {
                 // Initialize map
@@ -264,16 +267,12 @@ const userLocationIcon = "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.
             userMarker.setMap(null);
         }
 
-        // Add circle marker with custom size
+        // Add shaded dot marker
         userMarker = new google.maps.Marker({
             position: { lat: lat, lng: lng },
             map: map,
             title: "Your Location",
-            icon: {
-                url: userLocationIcon.url,
-                scaledSize: new google.maps.Size(20, 20), // Make it bigger
-                anchor: new google.maps.Point(10, 10)
-            },
+            icon: userLocationIcon,
             zIndex: 1000
         });
 
